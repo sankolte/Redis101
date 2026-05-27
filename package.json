@@ -1,0 +1,18 @@
+{
+  "name": "redis",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ok toh uk that concept where > ekk ekk package or dependecy ko container me dal do >> aise multiple packges or depnencry multiple containers \r abb sab ko to \"docker run express \" aise nahi run kar skate na toh agar bohot sare ho conatiners to we use docker-compose.yml and uske unser constoners>>>",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node 1.setup/src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.2.1",
+    "ioredis": "^5.11.0",
+    "mongoose": "^9.6.2"
+  }
+}
