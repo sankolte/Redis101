@@ -103,3 +103,64 @@ Creates storage volumes
 Starts everything
 
 automatically.
+
+
+
+# Also about key managegemnt 
+
+so we know redis me key-> value ke format me store hota he data right 
+
+banner:homepage:{some data}
+like this where banner:homepage -> is a key 
+
+now redis me aise kitne sare keys hoge right like in genral
+so for padhathsir pana => keys ke naam achese diyakaro in redis 
+for eg:::
+
+Example:
+
+banner:homepage
+banner:festival
+banner:mobile
+
+Now everything related to banners starts with:
+
+banner 
+like this >>>>>>>>>>>>>>>
+
+ 
+================== 
+# folow this prac
+Suppose everywhere in code you write:
+
+redis.get("banner:homepage")
+
+then somewhere else:
+
+redis.set("homepage:banner")
+
+then somewhere:
+
+redis.del("banner-homepage")
+
+Tiny typo:
+everything breaks silently.
+
+Redis won't warn you.
+
+So professionals centralize keys
+
+Example:
+
+export const REDIS_KEYS = {
+   HOMEPAGE_BANNER: "banner:homepage",
+   OTP: (phone) => `otp:${phone}`,
+   USER_SESSION: (id) => `session:${id}`
+}
+
+Now everywhere:
+
+redis.get(REDIS_KEYS.HOMEPAGE_BANNER)
+
+instead of manually typing strings
+
