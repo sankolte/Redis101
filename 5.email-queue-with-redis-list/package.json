@@ -1,0 +1,13 @@
+{
+  "name": "5.email-queue-with-redis-list",
+  "version": "1.0.0",
+  "type":"module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
