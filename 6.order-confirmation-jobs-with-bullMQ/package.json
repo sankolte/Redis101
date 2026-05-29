@@ -1,0 +1,16 @@
+{
+  "name": "6.order-confirmation-jobs-with-bullmq",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "node index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bullmq": "^5.77.6"
+  }
+}
