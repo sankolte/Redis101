@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="TypeRacer Live Leaderboard — Real-time typing speed challenge powered by Redis Sorted Sets, Hashes, Pub/Sub, and Lists">
+    <title>TypeRacer — Live Typing Leaderboard</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="app-container">
+
+    <!-- ========== Header ========== -->
+    <header class="header">
+        <div class="header-left">
+            <span class="logo-icon">🏆</span>
+            <h1 class="logo">TypeRacer</h1>
+        </div>
+        <div id="connection-badge" class="connection-badge disconnected">
+            <span class="connection-dot"></span> Connecting...
+        </div>
+    </header>
+
+    <!-- ========== Stats Bar ========== -->
+    <div class="stats-bar">
+        <div class="stat-card glass-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-info">
+                <div class="stat-value" id="stat-players">0</div>
+                <div class="stat-label">Players</div>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <div class="stat-icon">🎮</div>
+            <div class="stat-info">
+                <div class="stat-value" id="stat-games">0</div>
+                <div class="stat-label">Games Played</div>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <div class="stat-icon">⚡</div>
+            <div class="stat-info">
+                <div class="stat-value" id="metric-wpm">0</div>
+                <div class="stat-label">Current WPM</div>
+            </div>
+        </div>
+        <div class="stat-card glass-card">
+            <div class="stat-icon">🎯</div>
+            <div class="stat-info">
+                <div class="stat-value" id="metric-accuracy">100%</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Main Grid: Typing + Leaderboard ========== -->
+    <div class="main-grid">
+
+        <!-- Typing Test -->
+        <div class="typing-section glass-card">
+            <div class="section-header">
+                <div class="section-title">
+                    <span>⌨️</span> Type the passage below
+                </div>
+                <div class="difficulty-tabs">
+                    <button class="diff-tab" data-game="easy">Easy</button>
+                    <button class="diff-tab active" data-game="medium">Medium</button>
+                    <button class="diff-tab" data-game="hard">Hard</button>
+                </div>
+            </div>
+
+            <!-- Player Name & Avatar -->
+            <div class="player-setup">
+                <input type="text" id="player-name" class="player-input" placeholder="Enter your name to start..." maxlength="20" autocomplete="off">
+                <div class="avatar-dropdown">
+                    <button id="avatar-btn" class="avatar-select">
+                        <span id="avatar-current">⌨️</span> ▾
+                    </button>
+                    <div id="avatar-options" class="avatar-options hidden">
+                        <button class="avatar-option" data-avatar="⌨️">⌨️</button>
+                        <button class="avatar-option" data-avatar="⚡">⚡</button>
+                        <button class="avatar-option" data-avatar="🔥">🔥</button>
+                        <button class="avatar-option" data-avatar="🚀">🚀</button>
+                        <button class="avatar-option" data-avatar="👑">👑</button>
+                        <button class="avatar-option" data-avatar="🥷">🥷</button>
+                        <button class="avatar-option" data-avatar="🧙">🧙</button>
+                        <button class="avatar-option" data-avatar="🎮">🎮</button>
+                        <button class="avatar-option" data-avatar="💎">💎</button>
+                        <button class="avatar-option" data-avatar="🌟">🌟</button>
+                        <button class="avatar-option" data-avatar="🦅">🦅</button>
+                        <button class="avatar-option" data-avatar="🏎️">🏎️</button>
+                        <button class="avatar-option" data-avatar="🎵">🎵</button>
+                        <button class="avatar-option" data-avatar="🤖">🤖</button>
+                        <button class="avatar-option" data-avatar="🔮">🔮</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Typing Display -->
+            <div id="typing-display" class="typing-display">
+                <span class="char pending">Loading...</span>
+            </div>
+
+            <!-- Hidden input to capture keystrokes -->
+            <input type="text" id="typing-input" class="typing-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+            <!-- Typing Metrics -->
+            <div class="typing-metrics">
+                <div class="metric-box">
+                    <div class="metric-value" id="metric-time">0s</div>
+                    <div class="metric-label">Time</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="metric-wpm-live">0</div>
+                    <div class="metric-label">WPM</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value green" id="metric-acc-live">100%</div>
+                    <div class="metric-label">Accuracy</div>
+                </div>
+                <div class="metric-box">
+                    <div class="metric-value" id="metric-progress">0%</div>
+                    <div class="metric-label">Progress</div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="typing-actions">
+                <button id="btn-start" class="btn btn-primary">⌨️ Start Typing</button>
+                <button id="btn-reset" class="btn btn-secondary">🔄 New Passage</button>
+            </div>
+        </div>
+
+        <!-- Live Leaderboard -->
+        <div class="leaderboard-section glass-card">
+            <div class="section-header">
+                <div class="section-title">
+                    <span>🏅</span> Live Leaderboard
+                </div>
+            </div>
+            <div id="leaderboard-list" class="leaderboard-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">🏜️</div>
+                    <div class="empty-state-text">Loading...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Bottom Grid: Player Lookup + Activity ========== -->
+    <div class="bottom-grid">
+
+        <!-- Player Lookup -->
+        <div class="lookup-section glass-card">
+            <div class="section-header">
+                <div class="section-title">
+                    <span>🔍</span> Player Lookup
+                </div>
+            </div>
+            <div class="lookup-input-group">
+                <input type="text" id="lookup-input" class="lookup-input" placeholder="Enter player name..." autocomplete="off">
+                <button id="btn-lookup" class="btn btn-primary" style="padding: 10px 20px;">Search</button>
+            </div>
+            <div id="player-card-container">
+                <div class="empty-state">
+                    <div class="empty-state-icon">👤</div>
+                    <div class="empty-state-text">Search for a player to see their profile</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="activity-section glass-card">
+            <div class="section-header">
+                <div class="section-title">
+                    <span>📜</span> Recent Activity
+                </div>
+            </div>
+            <div id="activity-list" class="activity-list">
+                <div class="empty-state">
+                    <div class="empty-state-icon">📝</div>
+                    <div class="empty-state-text">Look up a player to see their history</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== Result Modal ========== -->
+<div id="result-modal" class="modal-overlay hidden">
+    <div class="result-modal">
+        <span id="result-emoji" class="result-emoji">🏆</span>
+        <h2 id="result-title" class="result-title">Amazing!</h2>
+        <p id="result-subtitle" class="result-subtitle">You completed the challenge!</p>
+
+        <div class="result-stats">
+            <div class="result-stat">
+                <div class="result-stat-value" id="result-wpm">0</div>
+                <div class="result-stat-label">WPM</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="result-time">0s</div>
+                <div class="result-stat-label">Time</div>
+            </div>
+            <div class="result-stat">
+                <div class="result-stat-value" id="result-accuracy">0%</div>
+                <div class="result-stat-label">Accuracy</div>
+            </div>
+        </div>
+
+        <p id="result-rank-value" class="result-rank"></p>
+
+        <div class="result-actions">
+            <button id="btn-play-again" class="btn btn-primary">🔄 Play Again</button>
+            <button id="btn-close-modal" class="btn btn-secondary">✕ Close</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
